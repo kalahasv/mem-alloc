@@ -3,8 +3,11 @@
 #include <stdlib.h>
 #include<string.h>
 #include<stdio.h>
+#include <stdint.h> 
 
 #define MAX_LINE 80
+
+char *heap; //pointer to first block of heap 
 
 enum ALGORITHM {
     FIRSTFIT, 
@@ -21,25 +24,44 @@ void distributeInput(char* input, int* argc, char** argv) { //distributes input 
     }
 }
 
+void mmalloc(int size){
+    //do something 
+}
+
+void free(int index){
+    //do something
+}
+
+void blocklist(){
+    //do something
+}
+
+void writemem(int index, char* str){
+    //do something
+}
+
+void printmem(int index, int num_chars){
+    //do something
+}
                       
 
 void eval(char **argv, int argc, enum ALGORITHM algo){
 
     if (strcmp(argv[0],"malloc") == 0){
-        //do something 
+        mmalloc(argv[1]);
         
     }
     else if (strcmp(argv[0],"free") == 0){
-        //do something
+        free(argv[1]);
     }
     else if(strcmp(argv[0],"blocklist") == 0){ 
-        //do something
+        blocklist();
     }
     else if(strcmp(argv[0],"writemem") == 0){ 
-        //do something
+        writemem(argv[1],argv[2]);
     }
     else if(strcmp(argv[0],"printmem") == 0){ 
-        //do something
+        printmem(argv[1],argv[2]);
     }
     else if (strcmp(argv[0],"quit") == 0){
         exit(0);
@@ -48,7 +70,11 @@ void eval(char **argv, int argc, enum ALGORITHM algo){
 
 }
 
+
+
 int main(int argc, char* argv[]){
+
+    heap = (int*) malloc(128 * sizeof(int)); //original malloc of heap 
     char input[MAX_LINE]; //user input
     int u_argc = 0;//user entered: number of arguments
     char* u_argv[MAX_LINE]; //user entered: number of arguments
