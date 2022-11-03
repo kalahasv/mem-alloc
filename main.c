@@ -20,6 +20,16 @@ void distributeInput(char* input, int* argc, char** argv) { //distributes input 
     }
 }
 
+int findFirstFree(){
+    /*
+    p = start; 
+    while ((p < end) &&     \\ not passed end
+    ((*p & 1) ||     \\ already allocated
+    (*p <= len)))    \\ too small 
+    p = p + (*p & -2);    \\ goto next block (word addressed) 
+    */  
+}
+
 void eval(char **argv, int argc, enum ALGORITHM algo){
 
     if (strcmp(argv[0],"malloc") == 0){
