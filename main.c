@@ -20,24 +20,7 @@ void distributeInput(char* input, int* argc, char** argv) { //distributes input 
     }
 }
 
-int findFirstFree(){
-    /*
-    p = start; 
-    while ((p < end) &&     \\ not passed end
-    ((*p & 1) ||     \\ already allocated
-    (*p <= len)))    \\ too small 
-    p = p + (*p & -2);    \\ goto next block (word addressed) 
-    */  
-}
-/*
-void addblock(ptr p, int len) { //note: int* p is listed as "ptr p" in the notes
-    int newsize = ((len + 1) >> 1) << 1;  // round up to even
-    int oldsize = *p & -2;                // mask out low bit
-    *p = newsize | 1;                     // set new length
-    if (newsize < oldsize)
-    *(p+newsize) = oldsize - newsize;   // set length in remaining part of block
-}      
-*/                                 
+                      
 
 void eval(char **argv, int argc, enum ALGORITHM algo){
 
