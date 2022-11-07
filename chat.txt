@@ -1,0 +1,10 @@
+
+They have a thing called unsigned char 
+im looking it up rn
+
+----
+
+OOOO
+nice all it was was changing that :')
+
+nvm free blocks so have header and footer ya?
