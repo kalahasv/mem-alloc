@@ -1,5 +1,5 @@
-//test
-//Vikasni Kalahasthi 78601545 ; 
+// test
+// Vikasni Kalahasthi 78601545 
 // Thi Thuy Trang Tran 74889299
 #include <stdlib.h>
 #include <string.h>
@@ -29,15 +29,6 @@ void distributeInput(char* input, int* argc, char** argv) { //distributes input 
     }
 }
 
-
-void bfmalloc(char* size) { //chooses block with fewest bytes left over
-    //keep track of current minimum of size - free_block_size
-    //if the free block is bigger than the size, then subtract and compare it to the smallest
-    //once you find the smallest, add block there and update the header/footers of the blocks
-
-    //do something
-}
-
 void freeMemory(char* index){
     // Assuming the index is at the correct address of the allocated block 
     int header = atoi(index) - 1;
@@ -56,34 +47,36 @@ void freeMemory(char* index){
         footer = nextHeader + size_next - 1;
     }
     // Coalescing with the previous block if free and not exceed the beginning of Heap
-    if( size_prev > 2 && a_prev  == 0) { //if prev block is free 
+    if( size_prev > 2 && a_prev == 0) { //if prev block is free 
         header = prevFooter - size_prev + 1; //prev footer - the size of previous block + 1 
     }
-
-    int size = footer - header + 1;
+    int newSize = footer - header + 1;  // in case size changes due to coalesces
     // free the whole coalesced block by setting the block back to all 0
-    //from header to footer should all be 0
-    for(int i = header; i <= footer; i ++){
+    // from header to footer should all be 0
+    for(int i = header; i <= footer; i ++){ 
         heap[i] = 0;
     }
-    // 
-
-    
     // Set freed size to header and footer with a-flag = 0
-    heap[header] = size << 1;
-    heap[footer] = size << 1;
-    
+    heap[header] = newSize << 1;
+    heap[footer] = newSize << 1;
 
 }
 
-void blocklist(){ //note: sort in order of payload size so this will need to be restructured- if payload sizes are equal, sort by lower address number
-    
 
+void blocklist(){ //note: sort in order of payload size so this will need to be restructured- if payload sizes are equal, sort by lower address number
+        
+        struct Block { 
+            int payload, start;
+            char status[MAX_LINE];
+        };
+        struct Block blockList[MAX_HEAP_SIZE];
         int header = 0;
         char status[MAX_LINE];
+        int current = 0;
+        struct Block temporary;
         
         while(header < MAX_HEAP_SIZE){
-           
+
            int a_flag = heap[header] & 1; //allocation status 0 = free 1 = allocated
            if(a_flag == 0){
             strcpy(status, "free");
@@ -96,16 +89,45 @@ void blocklist(){ //note: sort in order of payload size so this will need to be 
            int start = header + 1;
            int footer = header + block_size - 1;
            header = footer + 1;
-           printf("%d-%d-%s\n",payload,start,status);
+
+            
+           struct Block newBlock;
+           newBlock.payload = payload;
+           newBlock.start = start;
+           strcpy(newBlock.status,status);
+           
+           blockList[current] = newBlock;
+           current++;
+           
+           //printf("%d-%d-%s\n",payload,start,status);
+          
         }
-           //wdym the terminal looks fine to me? huh that's weird i can open a new one
-           //yes, but it's not in order since it's supposed to be sorted 
-           //  why? the list is supposed to be in order of payload size b
-           //ut the last one won't always be the biggest payload size no? 
-           //ye need to either insert into an array in order or sort an array afterwards aka a pain in the ass lol 
-           //decided to move on to something else cuz i'll deal with that tmr  i thought maybe a new struct or new array 
-           //Yeah that would be best probs 
-        // a problem for tmr lol xD
+        
+        
+        for (int i = 0; i < current; ++i){ //standard sorting alg from tutorialspoint.com
+            for (int j = i + 1; j < current; ++j){
+                if (blockList[i].payload < blockList[j].payload){
+                    temporary = blockList[i];
+                    blockList[i] = blockList[j];
+                    blockList[j] = temporary;
+                }
+                else if (blockList[i].payload == blockList[j].payload){
+                    if (blockList[i].start > blockList[j].start){
+                        temporary = blockList[i];
+                        blockList[i] = blockList[j];
+                        blockList[j] = temporary;
+                    }
+                }
+            }
+      
+      
+        }
+        
+       for(int i = 0; i < current; i++){
+             printf("%d-%d-%s\n",blockList[i].payload,blockList[i].start,blockList[i].status);
+       }
+       
+        
            
            
     
@@ -135,17 +157,41 @@ void printmem(char* c_index, char* c_number){ //we don't have to worry about how
     
 }
 
-/*int isAllocatedBlock(int block) {
-    int a_flag = block & 1;     // get the a-flag of the block.
-                                // last bit 1 -> allocated block. else 0 -> free block
-    return a_flag;
-}*/
-
-/*
-int getBlockSize( int block){ //get the size of the block
-    int size = 
-   
-*/
+void addMemory(int header, int newSize, int oldSize) {
+    // size of the remaining blocks when added blocks occupied the old blocks
+    int remaining = oldSize - newSize;
+    // Content of block: header + payload + footer
+    int footer = header + newSize - 1;  // update footer's block
+    // set a-flag = 1 and size for the newly added block
+    heap[header] = newSize << 1;    
+    heap[footer] = newSize << 1;
+    heap[header] = heap[header] | 1;
+    heap[footer] = heap[footer] | 1;
+    // set next header and footer
+    int nextHeader = footer + 1;
+    int nextFooter = nextHeader + remaining - 1;
+    // if we reach end of Heap. Return since no need to do splitting
+    if (nextHeader >= MAX_HEAP_SIZE) {
+        printf("%d\n", header + 1); // still need to print out address of the allocation right at end of heap
+        printf("Reached end of heap\n");
+        return;
+    }
+    // if the remaining free space is less than 3-bytes take the whole block
+    if (remaining < 3) {
+        heap[header] = oldSize << 1;
+        heap[nextFooter] = oldSize << 1;
+        heap[header] = heap[header] | 1;
+        heap[nextFooter] = heap[header] | 1;
+    }
+    else {  // splitting the old block into two blocks
+        // the remaining block is free. set a-flag = 0 by shifting its size to left
+        // they already had their positions only need to set their new sizes
+        heap[nextHeader] = remaining << 1;
+        heap[nextFooter] = remaining << 1;
+    }
+    // print the first address of newly allocated block
+    printf("%d\n", header + 1);
+}
 
 void ffmalloc(char* size) {    // FIRST-FIT algorithm
     // Iterate through the whole heap to find first block that fits from the start
@@ -153,53 +199,62 @@ void ffmalloc(char* size) {    // FIRST-FIT algorithm
     // Do splitting when two blocks of sizes not smaller than 3
     // otherwise just take the whole block
     int newSize = atoi(size) + 2;   // number of needed allocations + header and footer
-    int header = 0;     // starting at first block
-    while (header < MAX_HEAP_SIZE) {    // iterate until reaches end of heap
+    int header = 0;                 // starting at first block
+    while (header < MAX_HEAP_SIZE) {        // iterate until reaches end of heap
         int oldSize = heap[header] >> 1;    // size of block = first 7-bit
-        int remaining = oldSize - newSize;  // size of the remaining blocks when added blocks occupied the old blocks
-        int a = heap[header] & 1;   // get the a-flag. last bit = 1 -> allocated block. else 0 -> free block
-        if (a == 0 && oldSize >= newSize) {    // if block is free and its size is greater than the new size that
-                                                                // needed to be allocated
-            // Content of block: header + payload + footer
-            int footer = header + newSize - 1;  // update footer's block
-            // set a-flag = 1 and size for the newly added block
-            heap[header] = newSize << 1;    
-            heap[footer] = newSize << 1;
-            heap[header] = heap[header] | 1;
-            heap[footer] = heap[footer] | 1;
-            // set next header and footer
-            int nextHeader = footer + 1;
-            int nextFooter = nextHeader + remaining - 1;
-            // if we reach end of Heap. Return since no need to do splitting
-            if (nextHeader >= MAX_HEAP_SIZE) {
-                printf("%d\n", header + 1); // still need to print out address of the allocation right at end of heap
-                printf("Reached end of heap\n");
-                return;
-            }
-            // if the remaining free space is less than 3-bytes 
-            // take the whole block
-            if (remaining < 3) {
-                heap[header] = oldSize << 1;
-                heap[nextFooter] = oldSize << 1;
-                heap[header] = heap[header] | 1;
-                heap[nextFooter] = heap[header] | 1;
-            }
-            else {  // splitting the old block into two blocks
-                    // the remaining block is free. set a-flag = 0 by shifting its size to left
-                    // they already had their positions only need to set their new sizes
-                heap[nextHeader] = remaining << 1;
-                heap[nextFooter] = remaining << 1;
-            }
-            // print the first address of newly allocated block
-            printf("%d\n", header + 1);
+        int a_flag = heap[header] & 1;      // get the a-flag. last bit = 1 -> allocated block. else 0 -> free block
+        if (a_flag == 0 && oldSize >= newSize) {    // if block is free and its size is greater than the new size that need-to-be allocated
+            // Do the add and return
+            addMemory(header, newSize, oldSize);
             return;
         }
         else {
             // iterate to next header since current one is either allocated or not enough space
+            // jump to next header by size step
             header += heap[header] >> 1;
         }
     }
     return;
+}
+
+void bfmalloc(char* size) { //chooses block with fewest bytes left over - hmm maybe 
+
+    printf("We are using the best fit algorithm\n");
+
+    int min_position = 0;
+    int min_size = 99999999; // arbitrary large size to start
+    int newSize = atoi(size) + 2;
+    int isFound = 0;
+
+    // loop through heap to find the minimum that fits new size
+    int header = 0;
+    while(header < MAX_HEAP_SIZE){
+        //printf("Looping through heap. FLag 1.\n");
+        int a_flag = heap[header] & 1; //allocation status 0 = free 1 = allocated
+        //printf("Looping through heap. FLag 2.\n");
+        
+        int block_size = (heap[header] >> 1); 
+        int footer = header + block_size - 1;
+        
+        if(block_size < min_size && block_size >= newSize && a_flag == 0){ // block is smaller than current min and can fit new block
+            min_position = header; // update min position and min size
+            min_size = block_size;
+            isFound = 1;
+        }
+        header = footer + 1;
+        
+    }
+
+    printf("The minimum position found was %d, with a size of %d\n",min_position,min_size);
+    
+    // if min block is found -> Add memory else return without doing anything
+    if (isFound == 1) {
+        header = min_position;  // set min block back to header 
+        int oldSize = min_size;
+        addMemory(header, newSize, oldSize);
+    }
+    return;
+     
 }
                       
 
@@ -209,7 +264,8 @@ void eval(char **argv, int argc, enum ALGORITHM algo){
         if (algo == FIRSTFIT) {
             ffmalloc(argv[1]);  // add new space in heap using first fit algo
         }
-        else {                  
+        else {   
+                         
             bfmalloc(argv[1]);  // add new space in heap using best fit algo
         }  
     }
@@ -237,10 +293,6 @@ void eval(char **argv, int argc, enum ALGORITHM algo){
 
 int main(int argc, char* argv[]){
 
-    //heap = (int*) malloc(128 * sizeof(int)); //original malloc of heap 
-    // we don't need to use dynamic allocation for this
-    // we only make a heap simulation 
-
     // Since we declare our heap as global variable and global variable is automatically initialized with 0
     // We might not need to an intialization for local but i still put it here just in case
     // unsigned char heap[MAX_HEAP_SIZE] = {0};
@@ -257,7 +309,7 @@ int main(int argc, char* argv[]){
     enum  ALGORITHM algo = FIRSTFIT; //default memory allocation algorithm 
 
     if(argc == 2){
-        if(strcmp(argv[1],"BestFit")){
+        if(strcmp(argv[1],"BestFit") == 0){
             algo = BESTFIT;
         }
     }
