@@ -1,4 +1,3 @@
-// test
 // Vikasni Kalahasthi 78601545 
 // Thi Thuy Trang Tran 74889299
 #include <stdlib.h>
@@ -63,7 +62,7 @@ void freeMemory(char* index){
 }
 
 
-void blocklist(){ //note: sort in order of payload size so this will need to be restructured- if payload sizes are equal, sort by lower address number
+void blocklist(){ // note: sort in order of payload size so this will need to be restructured- if payload sizes are equal, sort by lower address number
         
         struct Block { 
             int payload, start;
@@ -98,13 +97,8 @@ void blocklist(){ //note: sort in order of payload size so this will need to be 
            
            blockList[current] = newBlock;
            current++;
-           
-           //printf("%d-%d-%s\n",payload,start,status);
-          
         }
-        
-        
-        for (int i = 0; i < current; ++i){ //standard sorting alg from tutorialspoint.com
+        for (int i = 0; i < current; ++i){ // standard sorting alg from tutorialspoint.com
             for (int j = i + 1; j < current; ++j){
                 if (blockList[i].payload < blockList[j].payload){
                     temporary = blockList[i];
@@ -119,38 +113,30 @@ void blocklist(){ //note: sort in order of payload size so this will need to be 
                     }
                 }
             }
-      
-      
         }
-        
        for(int i = 0; i < current; i++){
              printf("%d-%d-%s\n",blockList[i].payload,blockList[i].start,blockList[i].status);
        }
-       
-        
-           
-           
-    
 }
 
-void writemem(char* c_index, char* str){
+void writemem(char* c_index, char* str){    // no bounds-checking. can cause corruptions to heap structure
    int index = atoi(c_index);
-   for( int i = index; i < index + strlen(str); i ++){ //loop thorugh heap
+   for( int i = index; i < index + strlen(str); i ++){ //loop through heap
         int str_indx = i - index;
-        heap[i] = str[str_indx]; //assign heap index to each char of string
+        heap[i] = str[str_indx];    // assign heap index to each char of string
    }
    
 }
 
-void printmem(char* c_index, char* c_number){ //we don't have to worry about how this method can destroy the entire heap thankfully lol
-        int index = atoi(c_index); //change to ints
-        int number = atoi(c_number);
+void printmem(char* c_index, char* c_number){ // we don't have to worry about how this method can destroy the entire heap thankfully lol
+        int index = atoi(c_index);              // change to int. position of address
+        int number = atoi(c_number);            // number of addresses needed to print
         for(int i = index; i < index + number; i++){ //loop through heap
             if(i == index + number - 1){
-                printf("%d\n",heap[i]); //formatting
+                printf("%d\n", heap[i]);         // formatting
             }
             else{
-                printf("%d-",heap[i]);
+                printf("%d-", heap[i]);
             }
         }
     
@@ -221,8 +207,7 @@ void bfmalloc(char* size) {     // BEST-FIT algorithm
     // Iterating through the whole heap to find minimum-bytes block that fits the new size
     // if the min block is found, send its header to addMemory() to do the add and maybe split there
     // if not, inform that there is not enough space in heap
-
-    int min_position = 0;
+    int min_position = 0;           // start at the beginning of heap
     int min_size = 99999999;        // arbitrary large size to start
     int newSize = atoi(size) + 2;   // number of needed allocations + header and footer
     int isFound = 0;
@@ -241,7 +226,6 @@ void bfmalloc(char* size) {     // BEST-FIT algorithm
         }
         header = footer + 1;        // jump to next header in heap
     }
-    printf("The minimum position found was %d, with a size of %d\n",min_position,min_size);     // REMOVE ONCE DONE TESTING
     // if min block is found -> Add memory else return without doing anything
     if (isFound == 1) {
         header = min_position;  // set min block back to header 
