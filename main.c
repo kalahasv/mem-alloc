@@ -198,7 +198,7 @@ void ffmalloc(char* size) {    // FIRST-FIT algorithm
     // since we need to find the first block in ascending order
     // Do splitting when two blocks of sizes not smaller than 3
     // otherwise just take the whole block
-    int newSize = atoi(size) + 2;   // number of needed allocations + header and footer
+    int newSize = atoi(size) + 2;   // number of needed allocation + header and footer
     int header = 0;                 // starting at first block
     while (header < MAX_HEAP_SIZE) {        // iterate until reaches end of heap
         int oldSize = heap[header] >> 1;    // size of block = first 7-bit
@@ -217,41 +217,39 @@ void ffmalloc(char* size) {    // FIRST-FIT algorithm
     return;
 }
 
-void bfmalloc(char* size) { //chooses block with fewest bytes left over - hmm maybe 
-
-    printf("We are using the best fit algorithm\n");
+void bfmalloc(char* size) {     // BEST-FIT algorithm
+    // Iterating through the whole heap to find minimum-bytes block that fits the new size
+    // if the min block is found, send its header to addMemory() to do the add and maybe split there
+    // if not, inform that there is not enough space in heap
 
     int min_position = 0;
-    int min_size = 99999999; // arbitrary large size to start
-    int newSize = atoi(size) + 2;
+    int min_size = 99999999;        // arbitrary large size to start
+    int newSize = atoi(size) + 2;   // number of needed allocations + header and footer
     int isFound = 0;
 
     // loop through heap to find the minimum that fits new size
     int header = 0;
     while(header < MAX_HEAP_SIZE){
-        //printf("Looping through heap. FLag 1.\n");
-        int a_flag = heap[header] & 1; //allocation status 0 = free 1 = allocated
-        //printf("Looping through heap. FLag 2.\n");
-        
-        int block_size = (heap[header] >> 1); 
+        int a_flag = heap[header] & 1;          // allocation status 0 = free, 1 = allocated
+        int block_size = (heap[header] >> 1);   // size of block in order to do comparison 
         int footer = header + block_size - 1;
         
         if(block_size < min_size && block_size >= newSize && a_flag == 0){ // block is smaller than current min and can fit new block
-            min_position = header; // update min position and min size
+            min_position = header;  // update min position and min size
             min_size = block_size;
-            isFound = 1;
+            isFound = 1;            // set isFound to 1 since we have found the block
         }
-        header = footer + 1;
-        
+        header = footer + 1;        // jump to next header in heap
     }
-
-    printf("The minimum position found was %d, with a size of %d\n",min_position,min_size);
-    
+    printf("The minimum position found was %d, with a size of %d\n",min_position,min_size);     // REMOVE ONCE DONE TESTING
     // if min block is found -> Add memory else return without doing anything
     if (isFound == 1) {
         header = min_position;  // set min block back to header 
         int oldSize = min_size;
         addMemory(header, newSize, oldSize);
+    }
+    else {
+        printf("There is not enough space in heap\n");
     }
     return;
      
@@ -259,7 +257,6 @@ void bfmalloc(char* size) { //chooses block with fewest bytes left over - hmm ma
                       
 
 void eval(char **argv, int argc, enum ALGORITHM algo){
-
     if (strcmp(argv[0],"malloc") == 0){
         if (algo == FIRSTFIT) {
             ffmalloc(argv[1]);  // add new space in heap using first fit algo
@@ -285,8 +282,6 @@ void eval(char **argv, int argc, enum ALGORITHM algo){
     else if (strcmp(argv[0],"quit") == 0){
         exit(0);
     }
-
-
 }
 
 
@@ -298,15 +293,15 @@ int main(int argc, char* argv[]){
     // unsigned char heap[MAX_HEAP_SIZE] = {0};
 
     // Initialize header and footer at first stage when heap is empty
-    // both have size 127 at first with free a-flag. Shift-left << 1 -> LSB = 0
-    // 11111110 
+    // both have size 127 at first with free a-flag. Shift-left << 1 -> LSB = 0 
+    // 11111110 = size 127 with a_flag = 0
     heap[0] = (MAX_HEAP_SIZE << 1);                 // header
     heap[MAX_HEAP_SIZE - 1] = MAX_HEAP_SIZE << 1;   // footer
 
-    char input[MAX_LINE]; //user input
-    int u_argc = 0;//user entered: number of arguments
-    char* u_argv[MAX_LINE]; //user entered: number of arguments
-    enum  ALGORITHM algo = FIRSTFIT; //default memory allocation algorithm 
+    char input[MAX_LINE];               //user input
+    int u_argc = 0;                     //user entered: number of arguments
+    char* u_argv[MAX_LINE];             //user entered: number of arguments
+    enum  ALGORITHM algo = FIRSTFIT;    //default memory allocation algorithm 
 
     if(argc == 2){
         if(strcmp(argv[1],"BestFit") == 0){
@@ -314,8 +309,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-
-    while(1) { //take user input 
+    while(1) { // take user input 
         fflush(stdin);
         fflush(stdout);
         u_argc = 0;
