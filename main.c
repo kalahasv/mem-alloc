@@ -1,5 +1,4 @@
-// Vikasni Kalahasthi 78601545 
-// Thi Thuy Trang Tran 74889299
+// Vikasni Kalahasthi 78601545 & Thi Thuy Trang Tran 74889299
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -98,7 +97,7 @@ void blocklist(){ // note: sort in order of payload size so this will need to be
            blockList[current] = newBlock;
            current++;
         }
-        for (int i = 0; i < current; ++i){ // standard sorting alg from tutorialspoint.com
+        for (int i = 0; i < current; ++i){ // standard sorting alg 
             for (int j = i + 1; j < current; ++j){
                 if (blockList[i].payload < blockList[j].payload){
                     temporary = blockList[i];
